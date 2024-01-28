@@ -1,0 +1,74 @@
+import json
+import requests
+import csv
+
+def github_auth(url, lsttoken, ct):
+    jsonData = None
+    try:
+        ct = ct % len(lstTokens)
+        headers = {'Authorization': 'Bearer {}'.format(lsttoken[ct])}
+        request = requests.get(url, headers=headers)
+        jsonData = json.loads(request.content)
+        ct += 1
+    except Exception as e:
+        pass
+        print(e)
+    return jsonData, ct
+
+def authors_file_touches(lstTokens, repo):
+    authors_dict = {}
+
+    for filename in dictfiles.keys():
+        ipage = 1  # url page counter
+        ct = 0  # token counter
+
+        try:
+            # Loop through all the commit pages until the last returned empty page
+            while True:
+                spage = str(ipage)
+                commits_url = 'https://api.github.com/repos/' + repo + '/commits?page=' + spage + '&per_page=100'
+                json_commits, ct = github_auth(commits_url, lstTokens, ct)
+
+                # Break out of the while loop if there are no more commits in the pages
+                if len(json_commits) == 0:
+                    break
+
+                # Iterate through the list of commits in spage
+                for shaObject in json_commits:
+                    sha = shaObject['sha']
+                    # For each commit, use the GitHub commit API to extract the files touched by the commit
+                    sha_url = 'https://api.github.com/repos/' + repo + '/commits/' + sha
+                    sha_details, ct = github_auth(sha_url, lstTokens, ct)
+                    files_json = sha_details['files']
+
+                    for filename_obj in files_json:
+                        if filename_obj['filename'] == filename:
+                            author = shaObject['commit']['author']['name']
+                            date = shaObject['commit']['author']['date']
+                            if filename not in authors_dict:
+                                authors_dict[filename] = []
+                            authors_dict[filename].append({'author': author, 'date': date})
+
+                ipage += 1
+        except:
+            print("Error receiving data")
+            exit(0)
+
+    return authors_dict
+
+# Example usage:
+# Replace 'fd02a694b606c4120b8ca7bbe7ce29229376ee', '16ce529bdb32263fb90a392d38b5f53c7ecb6e', '8cea5715051869e98044f38b60fe897b350d4c'
+# with your actual GitHub tokens.
+lstTokens = ["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"]
+
+# Replace 'scottyab/rootbeer' with your desired GitHub repository.
+repo = 'scottyab/rootbeer'
+
+# Assuming that dictfiles is defined and contains the list of source files as in your CollectFiles script.
+# Example: dictfiles = {"file1.py": 5, "file2.py": 3, ...}
+dictfiles = {"file1.py": 5, "file2.py": 3, "file3.py": 7, "file4.py": 2}
+
+authors_dict = authors_file_touches(lstTokens, repo)
+
+# Display authors_dict or save it to a file, as needed.
+print(json.dumps(authors_dict, indent=2))
