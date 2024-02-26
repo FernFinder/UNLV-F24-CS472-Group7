@@ -9,6 +9,7 @@ using namespace std;
 void printmatrix(int [][4]);
 bool isgoalstate(int [][4]);
 bool isequivstate(int [][4], int [][4]);
+void applyOperator(Node&, int, vector<Node>&, vector<Node>&, function<void(Node&)>);
 
 struct compare{
     const bool operator() (const Node& l, const Node& r){
@@ -65,181 +66,27 @@ int main(){
         closedSet.push_back(current);
         int parentIndex = closedSet.size()-1;
 
-        //UP operator
-        if(current.blankRow > 0){     
-            //Generate node for UP operator
-            Node neighbor = current;
-            neighbor.UP();
-            neighbor.prev = parentIndex;
-            neighbor.gScore += 1;
-            neighbor.hScore = neighbor.calcHeuristic();
-            neighbor.fScore = neighbor.gScore + neighbor.hScore;
+    // Usage of the applyOperator function
 
-            //Check if in closedSet
-            bool closedNode = false;
-            for(int i = 0; i < closedSet.size(); i++){
-                if(isequivstate(neighbor.matrix, closedSet[i].matrix)){
-                    closedNode = true;
-                    break;
-                }
-            }
+    // UP operator
+    if (current.blankRow > 0) {
+        applyOperator(current, parentIndex, openSet, closedSet, [](Node& node) { node.UP(); });
+    }
 
-            //Skip this if it is a closedNode
-            if(!closedNode){
-                bool openNode = false;
-                int openNodeIndex = 0;
-                for(int i = 0; i < openSet.size(); i++){
-                    if(isequivstate(neighbor.matrix, openSet[i].matrix)){
-                        openNode = true;
-                        openNodeIndex = i;
-                        break;
-                    }
-                }
-                if(openNode){
-                    if(openSet[openNodeIndex].gScore > neighbor.gScore){
-                        openSet[openNodeIndex].gScore = neighbor.gScore;
-                        openSet[openNodeIndex].fScore = neighbor.fScore;
-                        openSet[openNodeIndex].prev = neighbor.prev;
-                    }
-                }
-                else{
-                    openSet.push_back(neighbor);
-                    push_heap(openSet.begin(), openSet.end());
-                }
-            }
-        }
+    // DOWN operator
+    if (current.blankRow < 3) {
+        applyOperator(current, parentIndex, openSet, closedSet, [](Node& node) { node.DOWN(); });
+    }
 
-        //DOWN operator
-        if(current.blankRow < 3){
-            //Generate node for DOWN operator
-            Node neighbor = current;
-            neighbor.DOWN();
-            neighbor.prev = parentIndex;
-            neighbor.gScore += 1;
-            neighbor.hScore = neighbor.calcHeuristic();
-            neighbor.fScore = neighbor.gScore + neighbor.hScore;
+    // LEFT operator
+    if (current.blankColumn != 0) {
+        applyOperator(current, parentIndex, openSet, closedSet, [](Node& node) { node.LEFT(); });
+    }
 
-            //Check if in closedSet
-            bool closedNode = false;
-            for(int i = 0; i < closedSet.size(); i++){
-                if(isequivstate(neighbor.matrix, closedSet[i].matrix)){
-                    closedNode = true;
-                    break;
-                }
-            }
-
-            //Skip this if it is a closedNode
-            if(!closedNode){
-                bool openNode = false;
-                int openNodeIndex = 0;
-                for(int i = 0; i < openSet.size(); i++){
-                    if(isequivstate(neighbor.matrix, openSet[i].matrix)){
-                        openNode = true;
-                        openNodeIndex = i;
-                        break;
-                    }
-                }
-                if(openNode){
-                    if(openSet[openNodeIndex].gScore > neighbor.gScore){
-                        openSet[openNodeIndex].gScore = neighbor.gScore;
-                        openSet[openNodeIndex].fScore = neighbor.fScore;
-                        openSet[openNodeIndex].prev = neighbor.prev;
-                    }
-                }
-                else{
-                    openSet.push_back(neighbor);
-                    push_heap(openSet.begin(), openSet.end());
-                }
-            }
-        }
-
-        //LEFT operator
-        if(current.blankColumn != 0){
-            //Generate node for UP operator
-            Node neighbor = current;
-            neighbor.LEFT();
-            neighbor.prev = parentIndex;
-            neighbor.gScore += 1;
-            neighbor.hScore = neighbor.calcHeuristic();
-            neighbor.fScore = neighbor.gScore + neighbor.hScore;
-
-            //Check if in closedSet
-            bool closedNode = false;
-            for(int i = 0; i < closedSet.size(); i++){
-                if(isequivstate(neighbor.matrix, closedSet[i].matrix)){
-                    closedNode = true;
-                    break;
-                }
-            }
-
-            //Skip this if it is a closedNode
-            if(!closedNode){
-                bool openNode = false;
-                int openNodeIndex = 0;
-                for(int i = 0; i < openSet.size(); i++){
-                    if(isequivstate(neighbor.matrix, openSet[i].matrix)){
-                        openNode = true;
-                        openNodeIndex = i;
-                        break;
-                    }
-                }
-                if(openNode){
-                    if(openSet[openNodeIndex].gScore > neighbor.gScore){
-                        openSet[openNodeIndex].gScore = neighbor.gScore;
-                        openSet[openNodeIndex].fScore = neighbor.fScore;
-                        openSet[openNodeIndex].prev = neighbor.prev;
-                    }
-                }
-                else{
-                    openSet.push_back(neighbor);
-                    push_heap(openSet.begin(), openSet.end());
-                }
-            }
-        }
-
-        //RIGHT operator
-        if(current.blankColumn != 3){
-            //Generate node for UP operator
-            Node neighbor = current;
-            neighbor.RIGHT();
-            neighbor.prev = parentIndex;
-            neighbor.gScore += 1;
-            neighbor.hScore = neighbor.calcHeuristic();
-            neighbor.fScore = neighbor.gScore + neighbor.hScore;
-
-            //Check if in closedSet
-            bool closedNode = false;
-            for(int i = 0; i < closedSet.size(); i++){
-                if(isequivstate(neighbor.matrix, closedSet[i].matrix)){
-                    closedNode = true;
-                    break;
-                }
-            }
-
-            //Skip this if it is a closedNode
-            if(!closedNode){
-                bool openNode = false;
-                int openNodeIndex = 0;
-                for(int i = 0; i < openSet.size(); i++){
-                    if(isequivstate(neighbor.matrix, openSet[i].matrix)){
-                        openNode = true;
-                        openNodeIndex = i;
-                        break;
-                    }
-                }
-                if(openNode){
-                    if(openSet[openNodeIndex].gScore > neighbor.gScore){
-                        openSet[openNodeIndex].gScore = neighbor.gScore;
-                        openSet[openNodeIndex].fScore = neighbor.fScore;
-                        openSet[openNodeIndex].prev = neighbor.prev;
-                    }
-                }
-                else{
-                    openSet.push_back(neighbor);
-                    push_heap(openSet.begin(), openSet.end());
-                }
-            }
-        }
+    // RIGHT operator
+    if (current.blankColumn != 3) {
+        applyOperator(current, parentIndex, openSet, closedSet, [](Node& node) { node.RIGHT(); });
+    }
 
     }
     
@@ -319,4 +166,44 @@ bool isequivstate(int current[][4], int vector[][4]){
         }
     }
     return true;
+}
+
+void applyOperator(Node& current, int parentIndex, vector<Node>& openSet, vector<Node>& closedSet, function<void(Node&)> operate) {
+    Node neighbor = current;
+    operate(neighbor);
+    neighbor.prev = parentIndex;
+    neighbor.gScore += 1;
+    neighbor.hScore = neighbor.calcHeuristic();
+    neighbor.fScore = neighbor.gScore + neighbor.hScore;
+
+    bool closedNode = false;
+    for (int i = 0; i < closedSet.size(); i++) {
+        if (isequivstate(neighbor.matrix, closedSet[i].matrix)) {
+            closedNode = true;
+            break;
+        }
+    }
+
+    if (!closedNode) {
+        bool openNode = false;
+        int openNodeIndex = 0;
+        for (int i = 0; i < openSet.size(); i++) {
+            if (isequivstate(neighbor.matrix, openSet[i].matrix)) {
+                openNode = true;
+                openNodeIndex = i;
+                break;
+            }
+        }
+
+        if (openNode) {
+            if (openSet[openNodeIndex].gScore > neighbor.gScore) {
+                openSet[openNodeIndex].gScore = neighbor.gScore;
+                openSet[openNodeIndex].fScore = neighbor.fScore;
+                openSet[openNodeIndex].prev = neighbor.prev;
+            }
+        } else {
+            openSet.push_back(neighbor);
+            push_heap(openSet.begin(), openSet.end());
+        }
+    }
 }
