@@ -97,7 +97,7 @@ int main(){
     cout << "\n open set size: " << openSet.size() << "\n";
     printmatrix(closedSet[trace].matrix);
     while(trace != -1){
-        path.push_back(trace);
+        path.push_back(trace);git
         trace = closedSet[trace].prev;
         printmatrix(closedSet[trace].matrix);
     }
